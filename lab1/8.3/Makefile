@@ -1,4 +1,4 @@
 all:
-	gcc -Wall -g -o main *.c
+	gcc -Wall -g -o main.exe *.c
 clean:
-	rm -f main
+	rm -f main.exe
