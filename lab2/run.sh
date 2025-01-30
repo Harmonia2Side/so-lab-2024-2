@@ -10,3 +10,5 @@ make clean
 
 #Compila tudo e imprime o resultado num log
 make all 2>&1 | tee make.log
+
+./main.exe 2>&1 | tee run.log
