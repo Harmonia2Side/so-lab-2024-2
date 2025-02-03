@@ -58,6 +58,8 @@ int main() {
 		sigfillset(&sigset);
 		// Remove bloqueio de SIGUSR1
 		sigdelset(&sigset, SIGUSR1);
+		// habilitar a linha a seguir faz o programa tornar-se um processo zumbi??
+		//sigdelset(&sigset, SIGUSR2);
 		time(&t);
 		printf("parent is waiting for child to send SIGUSR1 at %s",
 		ctime(&t));
