@@ -1,3 +1,4 @@
 *.log
 *.exe
 lab*_build
+*/.cache
