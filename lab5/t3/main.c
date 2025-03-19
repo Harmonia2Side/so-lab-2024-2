@@ -17,7 +17,7 @@
 int main() {
   int shmid; /* identificador da memoria comum */
   int size = 1024;
-  char *path = "../t1/./";
+  char *path = "./";
   char *mem;
   int flag = 0;
   /* recuperacao do shmid */
