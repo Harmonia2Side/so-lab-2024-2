@@ -10,7 +10,7 @@
 #define ADDKEY 123
 struct shmid_ds buf;
 int main() {
-  char *path = "../t1"; // TROQUE O VALOR!
+  char *path = "./"; // TROQUE O VALOR!
   int shmid;
   int size = 1024;
   /* recuperação do identificador do segmento associado à chave 123 */
