@@ -22,19 +22,23 @@ void produtor(FILE *arquivo) {
   while (true) {
     // read data from file
 
-    // sem_wait(EMPTY)
-    // sem_wait(LOCK)
+    sem_wait(&EMPTY);
+    sem_wait(&LOCK);
+
     // put data writepos
-    // sem_post(LOCK)
-    // sem_post(FULl)
+
+    sem_post(&LOCK);
+    sem_post(&FULL);
   }
 }
 
 void consumidor() {
   while (true) {
-    // sem_wait(FULL)
+    sem_wait(&FULL);
+
     // read data readpos
-    // sem_post(EMPTY)
+
+    sem_post(&EMPTY);
 
     // process data
   }
