@@ -49,7 +49,10 @@ void readReceita(Receita *r, FILE *arquivo) {
 
 void printReceita(Receita *r) {
   // TODO: Imprimir a receita
-  printf("TODO: Imprimir receita\n");
+  printf("\n");
+  printf("Nome do paciente: %s\n", r->nomePaciente);
+  printf("ID do medicamento: %d\n", r->idMedicamento);
+  printf("Quantidade: %d\n", r->qtd);
 }
 
 Receita **tabela;
