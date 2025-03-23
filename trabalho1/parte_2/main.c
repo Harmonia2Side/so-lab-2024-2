@@ -40,11 +40,11 @@ void readReceita(Receita *r, FILE *arquivo) {
   if (fgets(buffer, sizeof(buffer), arquivo) != NULL) {
     printf("Read line: %s", buffer);
   } else {
-    printf("End of file reached or error reading\n");
+    printf("EOF\n");
   }
   strcpy(r->nomePaciente, buffer);
-  fread(&r->idMedicamento, sizeof(int), 1, arquivo);
-  fread(&r->qtd, sizeof(int), 1, arquivo);
+  fscanf(arquivo, "%d", &r->idMedicamento);
+  fscanf(arquivo, "%d", &r->qtd);
 }
 
 void printReceita(Receita *r) {
