@@ -18,14 +18,19 @@ typedef struct Receita {
 
 Receita tabela[4];
 
+int writePos = 0;
+int readPos = 0;
+
 void produtor(FILE *arquivo) {
   while (true) {
     // read data from file
+    Receita r; // TODO - read
 
     sem_wait(&EMPTY);
     sem_wait(&LOCK);
 
-    // put data writepos
+    tabela[writePos] = r;
+    writePos = (writePos + 1) % N;
 
     sem_post(&LOCK);
     sem_post(&FULL);
@@ -36,7 +41,8 @@ void consumidor() {
   while (true) {
     sem_wait(&FULL);
 
-    // read data readpos
+    Receita r = tabela[readPos];
+    readPos = (readPos + 1) % N;
 
     sem_post(&EMPTY);
 
