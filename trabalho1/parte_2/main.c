@@ -16,6 +16,8 @@ typedef struct Receita {
   unsigned int qtd;
 } Receita;
 
+Receita tabela[4];
+
 void produtor(FILE *arquivo) {
   while (true) {
     // read data from file
