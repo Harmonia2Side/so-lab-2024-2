@@ -16,6 +16,8 @@ typedef struct Receita {
   unsigned int qtd;
 } Receita;
 
+Receita tabela[4];
+
 void produtor(FILE *arquivo) {
   while (true) {
     // read data from file
@@ -41,10 +43,15 @@ void consumidor() {
 int main() {
   pthread_t consumidor1, consumidor2, consumidor3, consumidor4, produtor;
 
-  FILE *arquivo1; // TODO: fopen
-  FILE *arquivo2; // TODO: fopen
-  FILE *arquivo3; // TODO: fopen
-  FILE *arquivo4; // TODO: fopen
+  FILE *arquivo1;
+  FILE *arquivo2;
+  FILE *arquivo3;
+  FILE *arquivo4;
+
+  arquivo1 = fopen("arquivos_teste/arquivo1.txt", "r");
+  arquivo2 = fopen("arquivos_teste/arquivo2.txt", "r");
+  arquivo3 = fopen("arquivos_teste/arquivo3.txt", "r");
+  arquivo4 = fopen("arquivos_teste/arquivo4.txt", "r");
 
   sem_init(&EMPTY, 0, N);
   sem_init(&FULL, 0, 0);
@@ -63,6 +70,11 @@ int main() {
   sem_destroy(&EMPTY);
   sem_destroy(&FULL);
   sem_destroy(&LOCK);
+
+  fclose(arquivo1);
+  fclose(arquivo2);
+  fclose(arquivo3);
+  fclose(arquivo4);
 
   return 0;
 }
