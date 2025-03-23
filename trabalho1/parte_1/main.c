@@ -8,7 +8,7 @@
 #define SOFA_LUGARES 4
 #define CADEIRAS_BARBEIROS 3
 #define NUM_BARBEIROS 1
-#define NUM_CLIENTES 1
+#define NUM_CLIENTES 10
 
 pthread_mutex_t mutexLoja = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexFila = PTHREAD_MUTEX_INITIALIZER;
@@ -27,6 +27,8 @@ int clientePagando = 0;
 int clientesAguardandoCorte = 0;
 bool lojaAberta = true;
 bool clienteSaiu = false;
+
+int clientesAguardandoPagamento = 0;
 
 void EntrarNaLoja(int id) {
     sleep(rand() % 3);
@@ -69,23 +71,25 @@ void Pagar(int id) {
     pthread_mutex_lock(&mutexFila);
     printf("Cliente %d: Aguardando pela chegada do barbeiro\n", id);
     pthread_cond_wait(&condCorteConcluido, &mutexFila);
-    pthread_mutex_unlock(&mutexFila);
 
     sleep(rand() % 3);
 
-    pthread_mutex_lock(&mutexPagamento);
     clientesNasCadeiras--;
     pthread_cond_signal(&condCadeiras);
 
     printf("Cliente %d: Se dirigindo ao caixa para pagar pelo serviço\n", id);
     
+    clientesAguardandoPagamento++;
     clientePagando = id;
-    pthread_cond_signal(&condBarbeiro);
-    while (clientePagando != 0) {
-        pthread_cond_wait(&condPagamento, &mutexPagamento);
+    
+    pthread_cond_broadcast(&condBarbeiro);
+
+    while (clientePagando == id) {
+        pthread_cond_wait(&condPagamento, &mutexFila);
     }
+
     printf("Cliente %d: Pagou pelo serviço.\n", id);
-    pthread_mutex_unlock(&mutexPagamento);
+    pthread_mutex_unlock(&mutexFila);
 }
 
 void SairDaLoja(int id) {
@@ -99,6 +103,7 @@ void SairDaLoja(int id) {
 }
 
 void CortarCabelo(int id){
+    sleep(rand() % 3);
     pthread_mutex_lock(&mutexFila);
     if (clientesAguardandoCorte <= 0) {
         pthread_mutex_unlock(&mutexFila);
@@ -117,27 +122,24 @@ void CortarCabelo(int id){
 }
 
 void AceitarPagamento(int id) {
-    pthread_mutex_lock(&mutexPagamento);
+    sleep(rand() % 3);
+    pthread_mutex_lock(&mutexFila);
 
-
-    if (clientePagando == 0) {
-        pthread_mutex_unlock(&mutexPagamento);
+    if (clientePagando == 0 || clientesAguardandoPagamento == 0) {
+        pthread_mutex_unlock(&mutexFila);
         return;
     }
 
-    printf("Barbeiro %d: Aceitando pagamento do cliente %d.\n", id, clientePagando);
+    int cliente_atual = clientePagando;
+    printf("Barbeiro %d: Aceitando pagamento do cliente %d.\n", id, cliente_atual);
 
     clientePagando = 0;
-    pthread_cond_signal(&condPagamento);
+    clientesAguardandoPagamento--;
     
-    while (!clienteSaiu) {
-        pthread_cond_wait(&condClienteSaiu, &mutexPagamento);
-    }
+    pthread_cond_broadcast(&condPagamento);
 
-    clienteSaiu = false;
-    pthread_mutex_unlock(&mutexPagamento);
+    pthread_mutex_unlock(&mutexFila);
 }
-
 
 void *cliente(void *arg) {
     int id = *(int *)arg;
@@ -164,15 +166,20 @@ void *barbeiro(void *arg) {
     int id = *(int *)arg;
     free(arg);
 
-    while (lojaAberta) {
+    while (1) {
         pthread_mutex_lock(&mutexFila);
+        
+        if (!lojaAberta && clientesAguardandoCorte == 0 && clientePagando == 0) {
+            pthread_mutex_unlock(&mutexFila);
+            break;
+        }
 
-        while (clientesNasCadeiras == 0 && clientePagando == 0 && lojaAberta) {
+        while (clientesAguardandoCorte == 0 && clientePagando == 0 && lojaAberta) {
             printf("Barbeiro %d: Aguardando cliente para corte ou pagamento\n", id);
             pthread_cond_wait(&condBarbeiro, &mutexFila);
         }
 
-        if (!lojaAberta) {
+        if (!lojaAberta && clientesAguardandoCorte == 0 && clientePagando == 0) {
             pthread_mutex_unlock(&mutexFila);
             break;
         }
@@ -180,7 +187,7 @@ void *barbeiro(void *arg) {
         if (clientePagando > 0) {
             pthread_mutex_unlock(&mutexFila);
             AceitarPagamento(id);
-        } else if (clientesNasCadeiras > 0) {
+        } else if (clientesAguardandoCorte > 0) {
             pthread_mutex_unlock(&mutexFila);
             CortarCabelo(id);
         } else {
@@ -191,7 +198,6 @@ void *barbeiro(void *arg) {
     printf("Barbeiro %d: Saindo da loja.\n", id);
     return NULL;
 }
-
 
 int main() {
     pthread_t clientes[NUM_CLIENTES], barbeiros[NUM_BARBEIROS];
@@ -213,9 +219,10 @@ int main() {
         pthread_join(clientes[i], NULL);
     }
 
-    pthread_mutex_lock(&mutexLoja);
+    pthread_mutex_lock(&mutexFila);
     lojaAberta = false;
-    pthread_mutex_unlock(&mutexLoja);
+    pthread_mutex_unlock(&mutexFila);
+    
     pthread_cond_broadcast(&condBarbeiro);
 
     for (int i = 0; i < NUM_BARBEIROS; i++) {
