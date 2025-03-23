@@ -19,6 +19,8 @@
 
 int N = 4;
 
+FILE **files;
+
 sem_t EMPTY;
 sem_t FULL;
 sem_t LOCK;
@@ -67,25 +69,16 @@ int main(int argc, char *argv[]) {
 
   //   pthread_t consumidor1, consumidor2, consumidor3, consumidor4, produtor;
 
-  //   FILE *arquivo1; // TODO: fopen
-  //   FILE *arquivo2; // TODO: fopen
-  //   FILE *arquivo3; // TODO: fopen
-  //   FILE *arquivo4; // TODO: fopen
-
-  // arquivo1 = fopen("arquivos_teste/arquivo1.txt", "r");
-  // arquivo2 = fopen("arquivos_teste/arquivo2.txt", "r");
-  // arquivo3 = fopen("arquivos_teste/arquivo3.txt", "r");
-  // arquivo4 = fopen("arquivos_teste/arquivo4.txt", "r");
-
   // Leitura de parâmetros de entrada
   if (argc != 2) {
     printf("Uso: %s <diretório contendo arquivos de teste>\n", argv[0]);
-    printf("Favor consultar README.md para mais informações");
+    printf("Favor consultar README.md para mais informações\n");
     return EXIT_FAILURE;
   }
 
   // Entra no diretório
   const char *dirPath = argv[1];
+  printf("Abrindo diretório \"%s\"\n", dirPath);
   DIR *dir = opendir(dirPath);
   // Tratamento de erro
   if (!dir) {
@@ -95,29 +88,41 @@ int main(int argc, char *argv[]) {
 
   // Lê todos os arquivos dentro do diretório e coloca os descritores de cada um
   // num elemento do vetor
-  int file_counter = 0;
+
+  // aloca vetor de descritores de arquivo
+  files = (FILE **)malloc(N * sizeof(FILE *));
+
+  for (int i = 0; i < N; i++) {
+    files[i] = (FILE *)malloc(sizeof(FILE));
+  }
+
+  // Leitura de arquivo um por um
   struct dirent *entry;
-  while ((entry = readdir(dir)) != NULL) {
+  int file_counter = 0;
+  while ((entry = readdir(dir)) != NULL && (file_counter < N)) {
+    // printf("Abrindo arquivo \"%s\"\n", entry->d_name);
+    // printf("file_counter: %d\n", file_counter);
     struct stat stats;
     char filePath[512];
 
+    // monta o caminho do arquivo baseado no diretório
     snprintf(filePath, sizeof(filePath), "%s/%s", dirPath, entry->d_name);
     if (stat(filePath, &stats) == -1) {
       perror("stat");
       continue;
     }
 
+    // Abre o arquivo e o coloca no vetor de descritores de arquivo
     if (S_ISREG(stats.st_mode)) {
-      FILE *file = fopen(filePath, "r");
-      if (!file) {
+      files[file_counter] = fopen(filePath, "r");
+      if (!files[file_counter]) {
         perror("fopen");
         continue;
       }
 
-      // Process the file here
-      printf("Processing file: %s\n", filePath);
-
-      fclose(file);
+      // log
+      printf("Arquivo aberto: %s\n", filePath);
+      file_counter++;
     }
   }
 
@@ -142,10 +147,9 @@ int main(int argc, char *argv[]) {
   sem_destroy(&FULL);
   sem_destroy(&LOCK);
 
-  // fclose(arquivo1);
-  // fclose(arquivo2);
-  // fclose(arquivo3);
-  // fclose(arquivo4);
+  for (int i = 0; i < N; i++) {
+    fclose(files[i]);
+  }
 
   return 0;
 }

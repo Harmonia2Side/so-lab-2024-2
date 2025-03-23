@@ -4,4 +4,4 @@
 
 ./make.sh
 
-./main.exe 2>&1 | tee run.log
+./main.exe arquivos_teste 2>&1 | tee run.log 
