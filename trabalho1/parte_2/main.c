@@ -1,8 +1,21 @@
+/*
+ * main.exe
+ * uso:
+ * main.exe <diretório contendo arquivos de teste>
+ * Cada execução do programa entrará apenas em um
+ * diretório e lerá apenas arquivos dentro do diretório
+ * adentrado.
+ * Para execução de múltiplos testes em múltiplos diretórios,
+ * por favor execute o programa múltiplas vezes.
+ */
+
+#include <dirent.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 
 int N = 4;
 
@@ -40,19 +53,67 @@ void consumidor() {
   }
 }
 
-int main() {
-  pthread_t consumidor1, consumidor2, consumidor3, consumidor4, produtor;
+int main(int argc, char *argv[]) {
 
-  FILE *arquivo1;
-  FILE *arquivo2;
-  FILE *arquivo3;
-  FILE *arquivo4;
+  //   pthread_t consumidor1, consumidor2, consumidor3, consumidor4, produtor;
 
-  arquivo1 = fopen("arquivos_teste/arquivo1.txt", "r");
-  arquivo2 = fopen("arquivos_teste/arquivo2.txt", "r");
-  arquivo3 = fopen("arquivos_teste/arquivo3.txt", "r");
-  arquivo4 = fopen("arquivos_teste/arquivo4.txt", "r");
+  //   FILE *arquivo1; // TODO: fopen
+  //   FILE *arquivo2; // TODO: fopen
+  //   FILE *arquivo3; // TODO: fopen
+  //   FILE *arquivo4; // TODO: fopen
 
+  // arquivo1 = fopen("arquivos_teste/arquivo1.txt", "r");
+  // arquivo2 = fopen("arquivos_teste/arquivo2.txt", "r");
+  // arquivo3 = fopen("arquivos_teste/arquivo3.txt", "r");
+  // arquivo4 = fopen("arquivos_teste/arquivo4.txt", "r");
+
+  // Leitura de parâmetros de entrada
+  if (argc != 2) {
+    printf("Uso: %s <diretório contendo arquivos de teste>\n", argv[0]);
+    printf("Favor consultar README.md para mais informações");
+    return EXIT_FAILURE;
+  }
+
+  // Entra no diretório
+  const char *dirPath = argv[1];
+  DIR *dir = opendir(dirPath);
+  // Tratamento de erro
+  if (!dir) {
+    perror("opendir");
+    return EXIT_FAILURE;
+  }
+
+  // Lê todos os arquivos dentro do diretório e coloca os descritores de cada um
+  // num elemento do vetor
+  int file_counter = 0;
+  struct dirent *entry;
+  while ((entry = readdir(dir)) != NULL) {
+    struct stat stats;
+    char filePath[512];
+
+    snprintf(filePath, sizeof(filePath), "%s/%s", dirPath, entry->d_name);
+    if (stat(filePath, &stats) == -1) {
+      perror("stat");
+      continue;
+    }
+
+    if (S_ISREG(stats.st_mode)) {
+      FILE *file = fopen(filePath, "r");
+      if (!file) {
+        perror("fopen");
+        continue;
+      }
+
+      // Process the file here
+      printf("Processing file: %s\n", filePath);
+
+      fclose(file);
+    }
+  }
+
+  closedir(dir);
+
+  // Inicializa semáforos
   sem_init(&EMPTY, 0, N);
   sem_init(&FULL, 0, 0);
   sem_init(&LOCK, 0, 1);
@@ -71,10 +132,10 @@ int main() {
   sem_destroy(&FULL);
   sem_destroy(&LOCK);
 
-  fclose(arquivo1);
-  fclose(arquivo2);
-  fclose(arquivo3);
-  fclose(arquivo4);
+  // fclose(arquivo1);
+  // fclose(arquivo2);
+  // fclose(arquivo3);
+  // fclose(arquivo4);
 
   return 0;
 }
