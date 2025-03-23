@@ -1,3 +1,9 @@
-Fulano 62112 1x
-Beltrano 2512 2x
-Cicrano 393 3x
+Fulano
+62112
+1
+Beltrano
+2512
+2
+Cicrano
+393
+3x

@@ -1,9 +1,27 @@
-Luís 230 13x
-João 1268 1x
-Jorge 592 7x
-José 506 3x
-Tiago 56 3x
-Sofia 539 2x
-Vitória 248 19x
-Washington 1 5x
-Wellington 64 14x
+Luís
+230
+13
+João
+1268
+1
+Jorge
+592
+7
+José
+506
+3
+Tiago
+56
+3
+Sofia
+539
+2
+Vitória
+248
+19
+Washington
+1
+5
+Wellington
+64
+14

@@ -1,3 +1,9 @@
-Ash 658 25x
-Misty 175 54x
-Brock 453 95x
+Ash
+658
+25
+Misty
+175
+54
+Brock
+453
+95
