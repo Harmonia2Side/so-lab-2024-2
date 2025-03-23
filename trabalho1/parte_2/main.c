@@ -36,7 +36,8 @@ Receita tabela[4];
 int writePos = 0;
 int readPos = 0;
 
-void produtor(FILE *arquivo) {
+void *produtor(void *ptr) {
+  FILE *arquivo = (FILE *)ptr;
   while (true) {
     // read data from file
     Receita r; // TODO - read
@@ -50,9 +51,10 @@ void produtor(FILE *arquivo) {
     sem_post(&LOCK);
     sem_post(&FULL);
   }
+  return NULL;
 }
 
-void consumidor() {
+void *consumidor() {
   while (true) {
     sem_wait(&FULL);
 
@@ -63,6 +65,7 @@ void consumidor() {
 
     // process data
   }
+  return NULL;
 }
 
 int main(int argc, char *argv[]) {
@@ -136,10 +139,10 @@ int main(int argc, char *argv[]) {
   sem_init(&FULL, 0, 0);
   sem_init(&LOCK, 0, 1);
 
-  pthread_create(&produtor1, NULL, produtor, files[0]);
-  pthread_create(&produtor2, NULL, produtor, files[1]);
-  pthread_create(&produtor3, NULL, produtor, files[2]);
-  pthread_create(&produtor1, NULL, produtor, files[3]);
+  pthread_create(&produtor1, NULL, produtor, (void *)files[0]);
+  pthread_create(&produtor2, NULL, produtor, (void *)files[1]);
+  pthread_create(&produtor3, NULL, produtor, (void *)files[2]);
+  pthread_create(&produtor1, NULL, produtor, (void *)files[3]);
 
   pthread_join(produtor1, NULL);
   pthread_join(produtor2, NULL);
