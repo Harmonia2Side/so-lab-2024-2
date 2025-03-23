@@ -71,7 +71,7 @@ void *consumidor() {
 int main(int argc, char *argv[]) {
 
   pthread_t produtor1, produtor2, produtor3, produtor4;
-  pthread_t consumidor;
+  pthread_t consumidor1;
 
   // Leitura de parâmetros de entrada
   if (argc != 2) {
