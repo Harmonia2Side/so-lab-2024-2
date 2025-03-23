@@ -15,6 +15,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 
 int N = 4;
@@ -31,7 +32,27 @@ typedef struct Receita {
   unsigned int qtd;
 } Receita;
 
-Receita tabela[4];
+void readReceita(Receita *r, FILE *arquivo) {
+
+  // Buffer to hold the characters read from the file
+  char buffer[100];
+  // Read the line until a newline is found
+  if (fgets(buffer, sizeof(buffer), arquivo) != NULL) {
+    printf("Read line: %s", buffer);
+  } else {
+    printf("End of file reached or error reading\n");
+  }
+  strcpy(r->nomePaciente, buffer);
+  fread(&r->idMedicamento, sizeof(int), 1, arquivo);
+  fread(&r->qtd, sizeof(int), 1, arquivo);
+}
+
+void printReceita(Receita *r) {
+  // TODO: Imprimir a receita
+  printf("TODO: Imprimir receita\n");
+}
+
+Receita **tabela;
 
 int writePos = 0;
 int readPos = 0;
@@ -40,8 +61,9 @@ void *produtor(void *ptr) {
   FILE *arquivo = (FILE *)ptr;
   while (true) {
     // read data from file
-    Receita r; // TODO - read
-
+    Receita *r;
+    r = (Receita *)malloc(sizeof(Receita));
+    readReceita(r, arquivo);
     sem_wait(&EMPTY);
     sem_wait(&LOCK);
 
@@ -51,14 +73,20 @@ void *produtor(void *ptr) {
     sem_post(&LOCK);
     sem_post(&FULL);
   }
+
+  // TODO: Finalizar thread quando arquivo terminar?
   return NULL;
 }
 
 void *consumidor() {
   while (true) {
     sem_wait(&FULL);
-
-    Receita r = tabela[readPos];
+    // processamento: Imprime a receita em tela
+    Receita *r = tabela[readPos];
+    printReceita(r);
+    // Desaloca a estrutura de receita
+    free(r);
+    // incrementa buffer circular
     readPos = (readPos + 1) % N;
 
     sem_post(&EMPTY);
@@ -72,6 +100,9 @@ int main(int argc, char *argv[]) {
 
   pthread_t produtor1, produtor2, produtor3, produtor4;
   pthread_t consumidor1;
+
+  // Aloca tabela partilhada
+  tabela = (Receita **)malloc(N * sizeof(Receita));
 
   // Leitura de parâmetros de entrada
   if (argc != 2) {
@@ -159,6 +190,8 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < N; i++) {
     fclose(files[i]);
   }
+
+  free(tabela);
 
   return 0;
 }
