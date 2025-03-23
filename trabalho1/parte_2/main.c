@@ -67,7 +67,7 @@ void consumidor() {
 
 int main(int argc, char *argv[]) {
 
-  //   pthread_t consumidor1, consumidor2, consumidor3, consumidor4, produtor;
+  pthread_t consumidor1, consumidor2, consumidor3, consumidor4, produtor;
 
   // Leitura de parâmetros de entrada
   if (argc != 2) {
@@ -128,15 +128,17 @@ int main(int argc, char *argv[]) {
 
   closedir(dir);
 
+  // // teste de leitura de arquivo
+  // char* ;
   // Inicializa semáforos
   sem_init(&EMPTY, 0, N);
   sem_init(&FULL, 0, 0);
   sem_init(&LOCK, 0, 1);
 
-  pthread_create(&consumidor1, NULL, consumidor, arquivo1);
-  pthread_create(&consumidor2, NULL, consumidor, arquivo2);
-  pthread_create(&consumidor3, NULL, consumidor, arquivo3);
-  pthread_create(&consumidor4, NULL, consumidor, arquivo4);
+  pthread_create(&consumidor1, NULL, consumidor, files[0]);
+  pthread_create(&consumidor2, NULL, consumidor, files[1]);
+  pthread_create(&consumidor3, NULL, consumidor, files[2]);
+  pthread_create(&consumidor4, NULL, consumidor, files[3]);
 
   pthread_join(consumidor1, NULL);
   pthread_join(consumidor2, NULL);
