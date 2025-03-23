@@ -139,15 +139,18 @@ int main(int argc, char *argv[]) {
   sem_init(&FULL, 0, 0);
   sem_init(&LOCK, 0, 1);
 
+  // cria threads
   pthread_create(&produtor1, NULL, produtor, (void *)files[0]);
   pthread_create(&produtor2, NULL, produtor, (void *)files[1]);
   pthread_create(&produtor3, NULL, produtor, (void *)files[2]);
-  pthread_create(&produtor1, NULL, produtor, (void *)files[3]);
+  pthread_create(&produtor4, NULL, produtor, (void *)files[3]);
+  pthread_create(&consumidor1, NULL, consumidor, NULL);
 
   pthread_join(produtor1, NULL);
   pthread_join(produtor2, NULL);
   pthread_join(produtor3, NULL);
   pthread_join(produtor4, NULL);
+  pthread_join(consumidor1, NULL);
 
   sem_destroy(&EMPTY);
   sem_destroy(&FULL);
