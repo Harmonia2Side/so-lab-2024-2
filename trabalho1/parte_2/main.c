@@ -18,6 +18,9 @@
 #include <string.h>
 #include <sys/stat.h>
 
+#define FILE_IS_NOT_OVER 0
+#define FILE_IS_OVER 1
+
 int N = 4;
 
 FILE **files;
@@ -32,7 +35,7 @@ typedef struct Receita {
   unsigned int qtd;
 } Receita;
 
-void readReceita(Receita *r, FILE *arquivo) {
+int readReceita(Receita *r, FILE *arquivo) {
 
   // Buffer to hold the characters read from the file
   // char buffer[100];
@@ -50,11 +53,20 @@ void readReceita(Receita *r, FILE *arquivo) {
   // buffer[strcspn(buffer, "\n")] = 0;
 
   // testing
-  fscanf(arquivo, "%s", r->nomePaciente);
+  if (fscanf(arquivo, "%s", r->nomePaciente) == EOF) {
+    return 1;
+  }
 
   // strcpy(r->nomePaciente, buffer);
-  fscanf(arquivo, "%d", &r->idMedicamento);
-  fscanf(arquivo, "%d", &r->qtd);
+  if (fscanf(arquivo, "%d", &r->idMedicamento) == EOF) {
+    return 1;
+  }
+
+  if (fscanf(arquivo, "%d", &r->qtd) == EOF) {
+    return 1;
+  }
+
+  return 0;
 }
 
 void printReceita(Receita *r) {
@@ -78,7 +90,14 @@ void *produtor(void *ptr) {
     // read data from file
     Receita *r;
     r = (Receita *)malloc(sizeof(Receita));
-    readReceita(r, arquivo);
+    // Se arquivo terminou, excerra thread
+    if (readReceita(r, arquivo) == FILE_IS_OVER) {
+      sem_wait(&LOCK);
+      finished++;
+      sem_post(&LOCK);
+      break;
+    }
+
     sem_wait(&EMPTY);
     sem_wait(&LOCK);
 
@@ -89,13 +108,13 @@ void *produtor(void *ptr) {
     sem_post(&FULL);
   }
 
-  // TODO: Finalizar thread quando arquivo terminar?
   return NULL;
 }
 
 void *consumidor() {
   while (true) {
-    if (finished == N) break;
+    if (finished == N)
+      break;
 
     sem_wait(&FULL);
     // processamento: Imprime a receita em tela
@@ -107,8 +126,6 @@ void *consumidor() {
     readPos = (readPos + 1) % N;
 
     sem_post(&EMPTY);
-
-    // process data
   }
   return NULL;
 }
