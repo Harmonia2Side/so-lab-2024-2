@@ -70,6 +70,8 @@ Receita **tabela;
 int writePos = 0;
 int readPos = 0;
 
+int finished = 0;
+
 void *produtor(void *ptr) {
   FILE *arquivo = (FILE *)ptr;
   while (true) {
@@ -93,6 +95,8 @@ void *produtor(void *ptr) {
 
 void *consumidor() {
   while (true) {
+    if (finished == N) break;
+
     sem_wait(&FULL);
     // processamento: Imprime a receita em tela
     Receita *r = tabela[readPos];
