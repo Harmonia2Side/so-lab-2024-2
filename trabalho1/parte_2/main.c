@@ -35,14 +35,24 @@ typedef struct Receita {
 void readReceita(Receita *r, FILE *arquivo) {
 
   // Buffer to hold the characters read from the file
-  char buffer[100];
+  // char buffer[100];
   // Read the line until a newline is found
-  if (fgets(buffer, sizeof(buffer), arquivo) != NULL) {
-    printf("Read line: %s", buffer);
-  } else {
-    printf("EOF\n");
-  }
-  strcpy(r->nomePaciente, buffer);
+
+  // does not work
+  // if (fgets(buffer, sizeof(buffer), arquivo) != NULL) {
+  //   printf("Read line: %s", buffer);
+  // } else {
+  //   printf("EOF\n");
+  // }
+
+  // does not work
+  // fgets(buffer, 99, arquivo);
+  // buffer[strcspn(buffer, "\n")] = 0;
+
+  // testing
+  fscanf(arquivo, "%s", r->nomePaciente);
+
+  // strcpy(r->nomePaciente, buffer);
   fscanf(arquivo, "%d", &r->idMedicamento);
   fscanf(arquivo, "%d", &r->qtd);
 }
