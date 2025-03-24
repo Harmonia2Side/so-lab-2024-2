@@ -8,5 +8,8 @@ set -e
 # Limpa compilação anterior
 make clean
 
+# gera debug
+make debug
+
 #Compila tudo e imprime o resultado num log
 make all 2>&1 | tee make.log

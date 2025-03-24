@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+// #include <unistd.h>
 
 #define FILE_IS_NOT_OVER 0
 #define FILE_IS_OVER 1
@@ -37,13 +38,9 @@ typedef struct Receita {
 
 int readReceita(Receita *r, FILE *arquivo) {
 
-  if (fscanf(arquivo, "%s", r->nomePaciente) == EOF) {
-    return 1;
-  }
+  fscanf(arquivo, "%s", r->nomePaciente);
 
-  if (fscanf(arquivo, "%d", &r->idMedicamento) == EOF) {
-    return 1;
-  }
+  fscanf(arquivo, "%d", &r->idMedicamento);
 
   if (fscanf(arquivo, "%d", &r->qtd) == EOF) {
     return 1;
@@ -94,8 +91,10 @@ void *produtor(void *ptr) {
 
 void *consumidor() {
   while (true) {
-    if (finished == N)
+    if (finished == N) {
+
       break;
+    }
 
     sem_wait(&FULL);
     // processamento: Imprime a receita em tela
@@ -190,6 +189,11 @@ int main(int argc, char *argv[]) {
   pthread_join(produtor3, NULL);
   pthread_join(produtor4, NULL);
   pthread_join(consumidor1, NULL);
+
+  // while (finished < N) {
+  //   printf("finished = %d\n", finished);
+  //   // sleep(1);
+  // }
 
   sem_destroy(&EMPTY);
   sem_destroy(&FULL);
