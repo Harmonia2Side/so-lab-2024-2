@@ -62,6 +62,7 @@ int writePos = 0;
 int readPos = 0;
 
 int finished = 0;
+int itensEscritos = 0;
 
 void *produtor(void *ptr) {
   FILE *arquivo = (FILE *)ptr;
@@ -81,6 +82,7 @@ void *produtor(void *ptr) {
 
     tabela[writePos] = r;
     writePos = (writePos + 1) % N;
+    itensEscritos++;
 
     sem_post(&LOCK);
     sem_post(&FULL);
@@ -90,9 +92,10 @@ void *produtor(void *ptr) {
 }
 
 void *consumidor() {
-  while (true) {
-    if (finished == N) {
+  int itensLidos = 0;
 
+  while (true) {
+    if (finished == N && itensEscritos == itensLidos) {
       break;
     }
 
@@ -104,6 +107,7 @@ void *consumidor() {
     free(r);
     // incrementa buffer circular
     readPos = (readPos + 1) % N;
+    itensLidos++;
 
     sem_post(&EMPTY);
   }
