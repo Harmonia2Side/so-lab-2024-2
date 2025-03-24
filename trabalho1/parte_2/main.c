@@ -37,27 +37,10 @@ typedef struct Receita {
 
 int readReceita(Receita *r, FILE *arquivo) {
 
-  // Buffer to hold the characters read from the file
-  // char buffer[100];
-  // Read the line until a newline is found
-
-  // does not work
-  // if (fgets(buffer, sizeof(buffer), arquivo) != NULL) {
-  //   printf("Read line: %s", buffer);
-  // } else {
-  //   printf("EOF\n");
-  // }
-
-  // does not work
-  // fgets(buffer, 99, arquivo);
-  // buffer[strcspn(buffer, "\n")] = 0;
-
-  // testing
   if (fscanf(arquivo, "%s", r->nomePaciente) == EOF) {
     return 1;
   }
 
-  // strcpy(r->nomePaciente, buffer);
   if (fscanf(arquivo, "%d", &r->idMedicamento) == EOF) {
     return 1;
   }
@@ -70,7 +53,6 @@ int readReceita(Receita *r, FILE *arquivo) {
 }
 
 void printReceita(Receita *r) {
-  // TODO: Imprimir a receita
   printf("\n");
   printf("Nome do paciente: %s\n", r->nomePaciente);
   printf("ID do medicamento: %d\n", r->idMedicamento);
@@ -87,7 +69,6 @@ int finished = 0;
 void *produtor(void *ptr) {
   FILE *arquivo = (FILE *)ptr;
   while (true) {
-    // read data from file
     Receita *r;
     r = (Receita *)malloc(sizeof(Receita));
     // Se arquivo terminou, excerra thread
@@ -155,9 +136,6 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  // Lê todos os arquivos dentro do diretório e coloca os descritores de cada um
-  // num elemento do vetor
-
   // aloca vetor de descritores de arquivo
   files = (FILE **)malloc(N * sizeof(FILE *));
 
@@ -169,8 +147,6 @@ int main(int argc, char *argv[]) {
   struct dirent *entry;
   int file_counter = 0;
   while ((entry = readdir(dir)) != NULL && (file_counter < N)) {
-    // printf("Abrindo arquivo \"%s\"\n", entry->d_name);
-    // printf("file_counter: %d\n", file_counter);
     struct stat stats;
     char filePath[512];
 
@@ -197,8 +173,6 @@ int main(int argc, char *argv[]) {
 
   closedir(dir);
 
-  // // teste de leitura de arquivo
-  // char* ;
   // Inicializa semáforos
   sem_init(&EMPTY, 0, N);
   sem_init(&FULL, 0, 0);
